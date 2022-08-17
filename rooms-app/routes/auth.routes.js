@@ -6,21 +6,22 @@ const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard.js');
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
 
-router.get('/signup', (req, res) => res.render('auth/signup'));
+router.get('/signup', isLoggedOut, (req, res) => res.render('auth/signup'));
 
-router.get('/userProfile', (req, res) => { res.render('users/user-profiles', { userInSession: req.session.currentUser });
+router.get('/userProfile', isLoggedIn, (req, res) => { res.render('users/user-profiles', { userInSession: req.session.currentUser });
 });
 
-router.post('/signup', (req, res, next) => {
-    const { username, password } = req.body;
+router.post('/signup', isLoggedOut, (req, res, next) => {
+    const { email, password, fullname} = req.body;
 
     bcryptjs
     .genSalt(saltRounds)
     .then(salt => bcryptjs.hash(password, salt))
     .then(hashedPassword => {
         return User.create({
-            username,
-            passwordHash: hashedPassword
+            email,
+            password: hashedPassword,
+            fullname
         });
     })
     .then(userFromDB => {
@@ -29,25 +30,25 @@ router.post('/signup', (req, res, next) => {
     .catch(error => next(error));
 });
 
-router.get('/login', (req, res) => res.render('auth/login'));
+router.get('/login', isLoggedOut, (req, res) => res.render('auth/login'));
 
-router.post('/login', (req, res, next) => {
+router.post('/login', isLoggedOut, (req, res, next) => {
     console.log('SESSION =====> ', req.session);
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (username === '' || password === ''){
+    if (email === '' || password === ''){
         res.render('auth/login',{
             errorMessage: 'Please enter both.'
         });
         return;
     }
 
-    User.findOne({ username })
+    User.findOne({ email })
     .then(user => {
         if(!user) {
             res.render('auth/login', { errorMessage: 'Email is not registered'});
             return;
-        } else if (bcryptjs.compareSync(password, user.passwordHash)) {
+        } else if (bcryptjs.compareSync(password, user.password)) {
             req.session.currentUser = user;
             res.redirect('userProfile');
           } else {
@@ -57,7 +58,7 @@ router.post('/login', (req, res, next) => {
         .catch(error => next(error));
     });
 
-    router.post('/logout', (req, res, next) => {
+    router.post('/logout', isLoggedIn, (req, res, next) => {
         req.session.destroy(err => {
             if (err) next(err);
             res.redirect('/');
