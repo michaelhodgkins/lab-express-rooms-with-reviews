@@ -1,0 +1,16 @@
+<h2>Update the room</h2>
+
+<form action="/room/{{_id}}/edit" method="post">
+
+<label for="name-input">Name:</label>
+<input type="text" name="name" id="name-input" value="{{name}}"required />
+
+<label for="description">Description:</label>
+<input type="text" name="description" id="description-input" value="{{description}}" />
+
+<label for="image-input">Image</label>
+<input type="text" name="imageUrl" id="image-input" {{image}} />
+
+
+<button type="submit">Save Changes</button>
+</form>

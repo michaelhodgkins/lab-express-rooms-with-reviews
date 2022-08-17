@@ -1,0 +1,11 @@
+<h2>Here are all the rooms</h2>
+{{#each allTheRoomFromDB}}
+<div>
+    <h2>{{name}}</h2>
+    <h3>{{description}}</h3>
+    <a href="/room/{{_id}}/edit">edit</a>
+    <form action="/room/{{_id}}/delete" method="POST">
+    <button>delete</button>
+    </form>
+</div>
+{{/each}}

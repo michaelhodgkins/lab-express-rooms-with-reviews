@@ -25,6 +25,7 @@ router.post('/signup', isLoggedOut, (req, res, next) => {
         });
     })
     .then(userFromDB => {
+        req.session.currentUser = userFromDB;
         res.redirect('/userProfile');
     })
     .catch(error => next(error));
